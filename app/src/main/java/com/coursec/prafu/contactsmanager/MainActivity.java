@@ -3,9 +3,11 @@ package com.coursec.prafu.contactsmanager;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Bitmap;
@@ -14,6 +16,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,36 +34,41 @@ public class MainActivity extends AppCompatActivity {
     MatrixCursor mMatrixCursor;
     ProgressDialog progressDialog;
     ListView lstContacts;
-    String displayName="";
-    String nickName="";
-    String homePhone="";
-    String mobilePhone="";
-    String workPhone="";
-    String photoPath="" + R.drawable.user;
-    byte[] photoByte=null;
-    String homeEmail="";
-    String workEmail="";
-    String companyName="";
-    String title="";
+    String displayName = "";
+    String nickName = "";
+    String homePhone = "";
+    String mobilePhone = "";
+    String workPhone = "";
+    String photoPath = "" + R.drawable.user;
+    byte[] photoByte = null;
+    String homeEmail = "";
+    String workEmail = "";
+    String companyName = "";
+    String title = "";
     String details = "";
+    private static final String TAG = "MainActivity";
+    private static final String[] CONTACT_PERMISSIONS = {Manifest.permission.READ_CONTACTS};
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         setTitle("Contact Manager");
+        verifyPermissions();
         // The contacts from the contacts content provider is stored in this cursor
-        mMatrixCursor = new MatrixCursor(new String[] { "_id","name","photo","details"} );
+        mMatrixCursor = new MatrixCursor(new String[]{"_id", "name", "photo", "details"});
 
         // Adapter to set data in the listview
         mAdapter = new SimpleCursorAdapter(getBaseContext(),
                 R.layout.lv_layout,
                 null,
-                new String[] { "name","photo","details"},
-                new int[] { R.id.tv_name,R.id.iv_photo,R.id.tv_details}, 0);
+                new String[]{"name", "photo", "details"},
+                new int[]{R.id.tv_name, R.id.iv_photo, R.id.tv_details}, 0);
 
         // Getting reference to listview
-         lstContacts = (ListView) findViewById(R.id.lst_contacts);
+        lstContacts = (ListView) findViewById(R.id.lst_contacts);
 
         // Setting the adapter to listview
         lstContacts.setAdapter(mAdapter);
@@ -77,8 +85,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** An AsyncTask class to retrieve and load listview with contacts */
-    private class ListViewContactsLoader extends AsyncTask<Void, Void, Cursor>{
+    /**
+     * An AsyncTask class to retrieve and load listview with contacts
+     */
+    private class ListViewContactsLoader extends AsyncTask<Void, Void, Cursor> {
 
         @Override
         protected Cursor doInBackground(Void... params) {
@@ -89,8 +99,8 @@ public class MainActivity extends AppCompatActivity {
             Cursor contactsCursor = getContentResolver().query(contactsUri, null, null, null,
                     ContactsContract.Contacts.DISPLAY_NAME + " ASC ");
 
-            if(contactsCursor.moveToFirst()){
-                do{
+            if (contactsCursor.moveToFirst()) {
+                do {
                     long contactId = contactsCursor.getLong(contactsCursor.getColumnIndex("_ID"));
 
                     Uri dataUri = ContactsContract.Data.CONTENT_URI;
@@ -101,79 +111,79 @@ public class MainActivity extends AppCompatActivity {
                             ContactsContract.Data.CONTACT_ID + "=" + contactId,
                             null, null);
 
-                     displayName="";
-                     nickName="";
-                     homePhone="";
-                     mobilePhone="";
-                     workPhone="";
-                     photoPath="" + R.drawable.user;
-                     photoByte=null;
-                     homeEmail="";
-                     workEmail="";
-                    companyName="";
-                     title="";
+                    displayName = "";
+                    nickName = "";
+                    homePhone = "";
+                    mobilePhone = "";
+                    workPhone = "";
+                    photoPath = "" + R.drawable.user;
+                    photoByte = null;
+                    homeEmail = "";
+                    workEmail = "";
+                    companyName = "";
+                    title = "";
 
-                    if(dataCursor.moveToFirst()){
+                    if (dataCursor.moveToFirst()) {
                         // Getting Display Name
-                        displayName = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME ));
-                        do{
+                        displayName = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+                        do {
 
                             // Getting NickName
-                            if(dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE))
+                            if (dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Nickname.CONTENT_ITEM_TYPE))
                                 nickName = dataCursor.getString(dataCursor.getColumnIndex("data1"));
 
                             // Getting Phone numbers
-                            if(dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)){
-                                switch(dataCursor.getInt(dataCursor.getColumnIndex("data2"))){
-                                    case ContactsContract.CommonDataKinds.Phone.TYPE_HOME :
+                            if (dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
+                                switch (dataCursor.getInt(dataCursor.getColumnIndex("data2"))) {
+                                    case ContactsContract.CommonDataKinds.Phone.TYPE_HOME:
                                         homePhone = dataCursor.getString(dataCursor.getColumnIndex("data1"));
                                         break;
-                                    case ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE :
+                                    case ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE:
                                         mobilePhone = dataCursor.getString(dataCursor.getColumnIndex("data1"));
                                         break;
-                                    case ContactsContract.CommonDataKinds.Phone.TYPE_WORK :
+                                    case ContactsContract.CommonDataKinds.Phone.TYPE_WORK:
                                         workPhone = dataCursor.getString(dataCursor.getColumnIndex("data1"));
                                         break;
                                 }
                             }
 
                             // Getting EMails
-                            if(dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE ) ) {
-                                switch(dataCursor.getInt(dataCursor.getColumnIndex("data2"))){
-                                    case ContactsContract.CommonDataKinds.Email.TYPE_HOME :
+                            if (dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
+                                switch (dataCursor.getInt(dataCursor.getColumnIndex("data2"))) {
+                                    case ContactsContract.CommonDataKinds.Email.TYPE_HOME:
                                         homeEmail = dataCursor.getString(dataCursor.getColumnIndex("data1"));
                                         break;
-                                    case ContactsContract.CommonDataKinds.Email.TYPE_WORK :
+                                    case ContactsContract.CommonDataKinds.Email.TYPE_WORK:
                                         workEmail = dataCursor.getString(dataCursor.getColumnIndex("data1"));
                                         break;
                                 }
                             }
 
                             // Getting Organization details
-                            if(dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE)){
+                            if (dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE)) {
                                 companyName = dataCursor.getString(dataCursor.getColumnIndex("data1"));
                                 title = dataCursor.getString(dataCursor.getColumnIndex("data4"));
                             }
 
                             // Getting Photo
-                            if(dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)){
+                            if (dataCursor.getString(dataCursor.getColumnIndex("mimetype")).equals(ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)) {
                                 photoByte = dataCursor.getBlob(dataCursor.getColumnIndex("data15"));
 
-                                if(photoByte != null) {
+                                if (photoByte != null) {
                                     Bitmap bitmap = BitmapFactory.decodeByteArray(photoByte, 0, photoByte.length);
 
                                     // Getting Caching directory
                                     File cacheDirectory = getBaseContext().getCacheDir();
 
                                     // Temporary file to store the contact image
-                                    File tmpFile = new File(cacheDirectory.getPath() + "/wpta_"+contactId+".png");
+                                    File tmpFile = new File(cacheDirectory.getPath() + "/wpta_" + contactId + ".png");
 
                                     // The FileOutputStream to the temporary file
                                     try {
                                         FileOutputStream fOutStream = new FileOutputStream(tmpFile);
 
                                         // Writing the bitmap to the temporary file as png file
-                                        bitmap.compress(Bitmap.CompressFormat.PNG,100, fOutStream);
+                                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOutStream);
 
                                         // Flush the FileOutputStream
                                         fOutStream.flush();
@@ -187,35 +197,35 @@ public class MainActivity extends AppCompatActivity {
                                     photoPath = tmpFile.getPath();
                                 }
                             }
-                        }while(dataCursor.moveToNext());
-                         details = "";
+                        } while (dataCursor.moveToNext());
+                        details = "";
 
                         // Concatenating various information to single string
-                        if(homePhone != null && !homePhone.equals("") )
+                        if (homePhone != null && !homePhone.equals(""))
                             details = "HomePhone : " + homePhone + "\n";
-                        if(mobilePhone != null && !mobilePhone.equals("") )
+                        if (mobilePhone != null && !mobilePhone.equals(""))
                             details += "MobilePhone : " + mobilePhone + "\n";
-                        if(workPhone != null && !workPhone.equals("") )
+                        if (workPhone != null && !workPhone.equals(""))
                             details += "WorkPhone : " + workPhone + "\n";
-                        if(nickName != null && !nickName.equals("") )
+                        if (nickName != null && !nickName.equals(""))
                             details += "NickName : " + nickName + "\n";
-                        if(homeEmail != null && !homeEmail.equals("") )
+                        if (homeEmail != null && !homeEmail.equals(""))
                             details += "HomeEmail : " + homeEmail + "\n";
-                        if(workEmail != null && !workEmail.equals("") )
+                        if (workEmail != null && !workEmail.equals(""))
                             details += "WorkEmail : " + workEmail + "\n";
-                        if(companyName != null && !companyName.equals("") )
+                        if (companyName != null && !companyName.equals(""))
                             details += "CompanyName : " + companyName + "\n";
-                        if(title != null && !title.equals("") )
+                        if (title != null && !title.equals(""))
                             details += "Title : " + title + "\n";
 
                         // Adding id, display name, path to photo and other details to cursor
-                        mMatrixCursor.addRow(new Object[]{ Long.toString(contactId),displayName,photoPath,details});
-                        Log.d("Contactid","is="+contactId);
-                        Log.d("diplayname","is="+displayName);
-                        Log.d("photopath","is="+photoPath);
-                        Log.d("details","is="+details);
+                        mMatrixCursor.addRow(new Object[]{Long.toString(contactId), displayName, photoPath, details});
+                        Log.d("Contactid", "is=" + contactId);
+                        Log.d("diplayname", "is=" + displayName);
+                        Log.d("photopath", "is=" + photoPath);
+                        Log.d("details", "is=" + details);
                     }
-                }while(contactsCursor.moveToNext());
+                } while (contactsCursor.moveToNext());
             }
 
             return mMatrixCursor;
@@ -227,46 +237,60 @@ public class MainActivity extends AppCompatActivity {
 
             mAdapter.swapCursor(result);
             progressDialog.dismiss();
-            Toast.makeText(MainActivity.this,"Contacts loaded successfully",Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Contacts loaded successfully", Toast.LENGTH_LONG).show();
             setlisteners();
         }
 
 
     }
-public void setlisteners()
-{
-    lstContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //int itemPosition     = position;
-            Bundle extras = new Bundle();
-            Bitmap image=null;
-            Intent intent = new Intent(MainActivity.this, detail.class);
 
-            TextView text1 = (TextView) view.findViewById(R.id.tv_name);
-            TextView text2 = (TextView) view.findViewById(R.id.tv_details);
-            String name = text1.getText().toString();
-            String det = text2.getText().toString();
-            ImageView im=(ImageView) view.findViewById(R.id.iv_photo);
-            im.invalidate();
-            im.buildDrawingCache();
-            image= im.getDrawingCache();
-            extras.putString("name", name); //this should pass the SQLite ROW_ID
-            extras.putString("details", det);
-            extras.putParcelable("imagebitmap", image);//this should pass the value of R.id.text1
-            intent.putExtras(extras);
-            Log.d("name","alldata="+name+" "+det+""+im);
-            startActivity(intent);
+    public void setlisteners() {
+        lstContacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //int itemPosition     = position;
+                Bundle extras = new Bundle();
+                Bitmap image = null;
+                Intent intent = new Intent(MainActivity.this, detail.class);
 
-        }
-    });
-}
+                TextView text1 = (TextView) view.findViewById(R.id.tv_name);
+                TextView text2 = (TextView) view.findViewById(R.id.tv_details);
+                String name = text1.getText().toString();
+                String det = text2.getText().toString();
+                ImageView im = (ImageView) view.findViewById(R.id.iv_photo);
+                im.invalidate();
+                im.buildDrawingCache();
+                image = im.getDrawingCache();
+                extras.putString("name", name); //this should pass the SQLite ROW_ID
+                extras.putString("details", det);
+                extras.putParcelable("imagebitmap", image);//this should pass the value of R.id.text1
+                intent.putExtras(extras);
+                Log.d("name", "alldata=" + name + " " + det + "" + im);
+                startActivity(intent);
 
+            }
+        });
+    }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
+    }
+
+    private void verifyPermissions() {
+        Log.d(TAG, "verifyPermissions: Checking Permissions.");
+
+        int permissionCallPhone = ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CONTACTS);
+        if (permissionCallPhone != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    CONTACT_PERMISSIONS,
+                    1
+            );
+        }
+
+
     }
 }
