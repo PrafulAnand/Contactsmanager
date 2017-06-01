@@ -239,6 +239,8 @@ public void setlisteners()
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             //int itemPosition     = position;
+            Bundle extras = new Bundle();
+            Bitmap image=null;
             Intent intent = new Intent(MainActivity.this, detail.class);
 
             TextView text1 = (TextView) view.findViewById(R.id.tv_name);
@@ -246,18 +248,13 @@ public void setlisteners()
             String name = text1.getText().toString();
             String det = text2.getText().toString();
             ImageView im=(ImageView) view.findViewById(R.id.iv_photo);
+            im.invalidate();
             im.buildDrawingCache();
-            Bitmap image= im.getDrawingCache();
-
-            Bundle extras = new Bundle();
-            extras.putParcelable("imagebitmap", image);
+            image= im.getDrawingCache();
+            extras.putString("name", name); //this should pass the SQLite ROW_ID
+            extras.putString("details", det);
+            extras.putParcelable("imagebitmap", image);//this should pass the value of R.id.text1
             intent.putExtras(extras);
-
-
-
-
-            intent.putExtra("name", name); //this should pass the SQLite ROW_ID
-            intent.putExtra("details", det); //this should pass the value of R.id.text1
             Log.d("name","alldata="+name+" "+det+""+im);
             startActivity(intent);
 
