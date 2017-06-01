@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto">
+
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/userpic"/>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_detailsview"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:layout_gravity="center"
+        android:layout_margin="20dp"
+        card_view:cardCornerRadius="5dp"
+        card_view:contentPadding="10dp"
+        android:layout_below="@+id/userpic"
+        >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+
+        <TextView
+            android:id="@+id/credentials"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:text="CREDENTIALS &amp; HIGHLIGHTS"/>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="4px"
+            android:background="@color/black"
+            android:layout_below="@+id/credentials"/>
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/credentials"
+            android:padding="15dp"
+            android:drawableLeft="@drawable/user"
+            android:layout_marginTop="20dp"
+            android:drawablePadding="6dp"
+            android:textSize="20sp"
+            android:textStyle="bold|italic"
+            />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1px"
+            android:background="@color/black"
+            android:layout_below="@+id/username"/>
+
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/user_detail"
+                android:padding="15dp"
+                android:drawableLeft="@drawable/info"
+                android:layout_below="@+id/username"
+                android:layout_marginTop="20dp"
+                android:drawablePadding="6dp"
+                android:textSize="20sp"
+                android:textStyle="bold|italic"/>
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1px"
+                android:background="@color/black"
+                android:layout_below="@+id/user_detail"/>
+        </RelativeLayout>
+
+    </android.support.v7.widget.CardView>
+    </RelativeLayout>
