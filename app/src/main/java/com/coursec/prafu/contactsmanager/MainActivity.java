@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     String details = "";
     private static final String TAG = "MainActivity";
     private static final String[] CONTACT_PERMISSIONS = {Manifest.permission.READ_CONTACTS};
+    final private int REQUEST_CODE_ASK_PERMISSIONS = 123;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         setTitle("Contact Manager");
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Fetching contacts...");
+        progressDialog.setCancelable(false);
         verifyPermissions();
         // The contacts from the contacts content provider is stored in this cursor
         mMatrixCursor = new MatrixCursor(new String[]{"_id", "name", "photo", "details"});
@@ -74,17 +78,17 @@ public class MainActivity extends AppCompatActivity {
         lstContacts.setAdapter(mAdapter);
 
         // Creating an AsyncTask object to retrieve and load listview with contacts
-        ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader();
+
 
         // Starting the AsyncTask process to retrieve and load listview with contacts
-        listViewContactsLoader.execute();
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Fetching contacts...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
 
     }
+public  void startloading_contacts()
+{ListViewContactsLoader listViewContactsLoader = new ListViewContactsLoader();
+    listViewContactsLoader.execute();
 
+
+}
     /**
      * An AsyncTask class to retrieve and load listview with contacts
      */
@@ -236,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
             // Setting the cursor containing contacts to listview
 
             mAdapter.swapCursor(result);
-            progressDialog.dismiss();
+            progressDialog.cancel();
             Toast.makeText(MainActivity.this, "Contacts loaded successfully", Toast.LENGTH_LONG).show();
             setlisteners();
         }
@@ -287,10 +291,32 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(
                     MainActivity.this,
                     CONTACT_PERMISSIONS,
-                    1
+                    REQUEST_CODE_ASK_PERMISSIONS
             );
+            return;
         }
+        progressDialog.show();
 
+startloading_contacts();
 
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    progressDialog.show();
+
+                    startloading_contacts();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(MainActivity.this, "READ_CONTACTS Denied", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 }
